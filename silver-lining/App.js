@@ -4,6 +4,7 @@ import {createStackNavigator} from "@react-navigation/stack";
 import {NavigationContainer} from "@react-navigation/native";
 
 import ProfileScreen from "./screens/ProfileScreen";
+import FeedScreen from "./screens/FeedScreen";
 
 const Stack = createStackNavigator()
 export default function App() {
@@ -11,7 +12,7 @@ export default function App() {
    <>
     <NavigationContainer>
       <Stack.Navigator id='1'>
-        <Stack.Screen name={"ProfileScreen"} component={ProfileScreen}></Stack.Screen>
+        <Stack.Screen name={"FeedScreen"} component={FeedScreen}></Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
    </>
