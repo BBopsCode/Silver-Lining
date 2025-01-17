@@ -1,3 +1,53 @@
 {
-
+  "posts": [
+    {
+      "id": 1,
+      "image": "https://i.postimg.cc/CKSFW6Fk/test.png",
+      "caption": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel enim vitae.",
+      "likes": 245,
+      "timestamp": "2024-01-16T14:23:00Z"
+    },
+    {
+      "id": 2,
+      "image": "https://i.postimg.cc/CKSFW6Fk/test.png",
+      "caption": "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia.",
+      "likes": 182,
+      "timestamp": "2024-01-16T12:15:00Z"
+    },
+    {
+      "id": 3,
+      "image": "https://i.postimg.cc/CKSFW6Fk/test.png",
+      "caption": "Nullam tincidunt mauris eu nisi tincidunt, vel sagittis purus tempor.",
+      "likes": 367,
+      "timestamp": "2024-01-16T10:45:00Z"
+    },
+    {
+      "id": 4,
+      "image": "https://i.postimg.cc/CKSFW6Fk/test.png",
+      "caption": "Maecenas consectetur justo at lectus hendrerit, nec elementum quam fermentum.",
+      "likes": 421,
+      "timestamp": "2024-01-16T09:30:00Z"
+    },
+    {
+      "id": 5,
+      "image": "https://i.postimg.cc/CKSFW6Fk/test.png",
+      "caption": "Phasellus venenatis magna in risus pharetra, vitae placerat tortor consequat.",
+      "likes": 198,
+      "timestamp": "2024-01-16T08:20:00Z"
+    },
+    {
+      "id": 6,
+      "image": "https://i.postimg.cc/CKSFW6Fk/test.png",
+      "caption": "Fusce dignissim felis ac diam pulvinar, in porttitor sem accumsan.",
+      "likes": 276,
+      "timestamp": "2024-01-16T07:10:00Z"
+    },
+    {
+      "id": 7,
+      "image": "https://i.postimg.cc/CKSFW6Fk/test.png",
+      "caption": "Donec auctor velit sit amet ipsum lobortis, quis rhoncus dolor condimentum.",
+      "likes": 334,
+      "timestamp": "2024-01-16T06:05:00Z"
+    }
+  ]
 }
