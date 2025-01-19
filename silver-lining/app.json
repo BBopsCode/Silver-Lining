@@ -12,6 +12,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow silver-lining to access your camera."
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true
     },
