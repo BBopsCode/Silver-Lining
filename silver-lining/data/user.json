@@ -2,6 +2,7 @@
   "profile_data": {
     "first": "Bryan",
     "last": "Wilson",
-    "picture": "profile.png"
+    "picture": "profile.png",
+    "posts": {}
   }
 }

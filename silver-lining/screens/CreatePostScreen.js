@@ -1,102 +1,108 @@
-import PhotoPreview from "../components/PhotoPreview";
-import { AntDesign } from '@expo/vector-icons';
-import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
-import { useRef, useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from "react";
+import {View, TextInput, StyleSheet, TouchableOpacity, Text, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard} from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import PhotoPreview from "../components/PhotoPreview";
+import TakePhoto from "../components/TakePhoto";
 
-export default function CreatePostScreen({navigation}) {
-    const [facing, setFacing] = useState('back');
-    const [permission, requestPermission] = useCameraPermissions();
-    const [photo, setPhoto] = useState(null);
-    const cameraRef = useRef(null);
+export default function CreatePostScreen({ navigation }) {
+    const [description, setDescription] = useState("");
+    const [cameraOn, setCameraOn] = useState(false)
 
-    if (!permission) {
-        // Camera permissions are still loading.
-        return <View />;
-    }
-
-    if (!permission.granted) {
-        // Camera permissions are not granted yet.
-        return (
-            <View style={styles.container}>
-                <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
-                <Button onPress={requestPermission} title="grant permission" />
-            </View>
-        );
-    }
-
-    function toggleCameraFacing() {
-        setFacing(current => (current === 'back' ? 'front' : 'back'));
-    }
-
-    const handleTakePhoto =  async () => {
-        if (cameraRef.current) {
-            const options = {
-                quality: 1,
-                base64: true,
-                exif: false,
-            };
-            const takedPhoto = await cameraRef.current.takePictureAsync(options);
-
-            setPhoto(takedPhoto);
-        }
+    const handleTakePhoto = () => {
+        setCameraOn(true)
     };
 
-    const handleRetakePhoto = () => setPhoto(null);
-
-    if (photo) return <PhotoPreview photo={photo} handleRetakePhoto={handleRetakePhoto} />
+    const handleSubmitPost = () => {
+        if (description.trim() === "") {
+            Alert.alert("Missing Description", "Please write about your miracle before submitting.");
+            return;
+        }
+        // Logic for submitting the post goes here
+        Alert.alert("Post Submitted", "Your post has been successfully created!");
+        setDescription(""); // Clear the input box
+        navigation.navigate("FeedScreen"); // Navigate back to FeedScreen
+    };
+    if (cameraOn) return <TakePhoto handleCloseCamera={()=>setCameraOn(false)}/>
 
     return (
-        <View style={styles.container}>
-            <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-                <TouchableOpacity onPress={()=> navigation.navigate("FeedScreen")} style={styles.backButton}>
-                    <MaterialIcons name="arrow-back" size={30} color="white" />
-                </TouchableOpacity>
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-                        <AntDesign name='retweet' size={44} color='black' />
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.container}>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate("FeedScreen")}
+                        style={styles.backButton}
+                    >
+                        <MaterialIcons name="arrow-back" size={30} color="white" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
-                        <AntDesign name='camera' size={44} color='black' />
+                    <TouchableOpacity style={styles.photoButton} onPress={handleTakePhoto}>
+                        <MaterialIcons name="photo-camera" size={60} color="white" />
+                    </TouchableOpacity>
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="Write about your miracle..."
+                        placeholderTextColor="gray"
+                        multiline
+                        value={description}
+                        onChangeText={setDescription}
+                        keyboardType="default"
+                        returnKeyType="done"
+                        onSubmitEditing={Keyboard.dismiss}
+                    />
+                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmitPost}>
+                        <Text style={styles.submitText}>Submit Post</Text>
                     </TouchableOpacity>
                 </View>
-            </CameraView>
-        </View>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        backgroundColor: "#000",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+    },
+    photoButton: {
+        width: 80,
+        height: 80,
+        backgroundColor: "#444",
+        borderRadius: 40,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 20,
     },
     backButton: {
-        position: 'absolute',
+        position: "absolute",
         top: 50,
         left: 20,
         padding: 10,
     },
-    camera: {
-        flex: 1,
+    textInput: {
+        width: "100%",
+        backgroundColor: "#222",
+        borderRadius: 10,
+        color: "white",
+        padding: 15,
+        fontSize: 16,
+        marginBottom: 20,
+        textAlignVertical: "top",
+        minHeight: 150,
     },
-    buttonContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        backgroundColor: 'transparent',
-        margin: 64,
-    },
-    button: {
-        flex: 1,
-        alignSelf: 'flex-end',
-        alignItems: 'center',
-        marginHorizontal: 10,
-        backgroundColor: 'gray',
+    submitButton: {
+        backgroundColor: "#007AFF",
+        paddingVertical: 15,
+        paddingHorizontal: 40,
         borderRadius: 10,
     },
-    text: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: 'white',
+    submitText: {
+        color: "white",
+        fontSize: 18,
+        fontWeight: "bold",
     },
 });

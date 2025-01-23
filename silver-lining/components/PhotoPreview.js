@@ -4,8 +4,10 @@ import React from 'react'
 import { TouchableOpacity, SafeAreaView, Image, StyleSheet, View } from 'react-native';
 
 const PhotoPreview = ({
-                                 photo,
-                                 handleRetakePhoto
+    photo,
+    handleRetakePhoto,
+    handlePhotoKept
+
 }) => (
     <SafeAreaView style={styles.container}>
         <View style={styles.box}>
@@ -18,6 +20,9 @@ const PhotoPreview = ({
         <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={handleRetakePhoto}>
                 <Fontisto name='trash' size={36} color='black' />
+            </TouchableOpacity>
+           <TouchableOpacity style={[styles.button, { backgroundColor: '#4261C7' }]} onPress={handlePhotoKept}>
+                <Fontisto name='check' size={26} color='white' />
             </TouchableOpacity>
         </View>
     </SafeAreaView>
@@ -46,8 +51,9 @@ const styles = StyleSheet.create({
     buttonContainer: {
         marginTop: '4%',
         flexDirection: 'row',
-        justifyContent: "center",
+        justifyContent: "space-between",
         width: '100%',
+        paddingHorizontal:40
     },
     button: {
         backgroundColor: 'gray',
