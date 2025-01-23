@@ -44,6 +44,7 @@ export default function CreatePostScreen({ navigation }) {
     const [description, setDescription] = useState("");
     const [cameraOn, setCameraOn] = useState(false)
     const [photo, setPhoto] = useState(null)
+    const [photoLocation, setPhotoLocation] = useState(null)
 
     const handleTakePhoto = () => {
         setCameraOn(true)
@@ -63,7 +64,14 @@ export default function CreatePostScreen({ navigation }) {
     };
     const updateUserPosts = async () =>{
         const data = await userJSON()
-        console.log(data)
+        console.log(data.posts)
+        data.posts.push({
+            "timestamp": new Date().toISOString(),
+            "description": description,
+            "imageFileLocation": photoLocation
+
+        })
+        await FileSystem.writeAsStringAsync(userFilePath, JSON.stringify(data,null,2))
     }
     const savePhotoLocally = async () =>{
         console.log("Running")
@@ -77,6 +85,7 @@ export default function CreatePostScreen({ navigation }) {
             });
 
             console.log(`Photo Saved at ${newUri}`);
+            setPhotoLocation(newUri)
         } catch (error) {
             console.error("Error saving photo:", error);
         }
