@@ -52,7 +52,10 @@ export default function TakePhoto({
     const handleRetakePhoto = () => {
         setPreview(false)
     };
-    const hidePreview = () => setPreview(false)
+    const hidePreview = () => {
+        setPreview(false);
+        handleCloseCamera(photo)
+    }
     if (photo && preview) return <PhotoPreview photo={photo} handleRetakePhoto={handleRetakePhoto} handlePhotoKept={hidePreview} />
     return (
         <View style={styles.container}>

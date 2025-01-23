@@ -13,7 +13,7 @@ const PhotoPreview = ({
         <View style={styles.box}>
             <Image
                 style={styles.previewConatiner}
-                source={{uri: 'data:image/jpg;base64,' + photo.base64}}
+                source={{uri: photo.uri}}
             />
         </View>
 

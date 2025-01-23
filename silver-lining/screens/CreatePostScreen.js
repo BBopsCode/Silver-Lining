@@ -1,5 +1,17 @@
 import React, { useState } from "react";
-import {View, TextInput, StyleSheet, TouchableOpacity, Text, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard} from "react-native";
+import {
+    View,
+    TextInput,
+    StyleSheet,
+    TouchableOpacity,
+    Text,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    TouchableWithoutFeedback,
+    Keyboard,
+    Image
+} from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import PhotoPreview from "../components/PhotoPreview";
 import TakePhoto from "../components/TakePhoto";
@@ -7,6 +19,7 @@ import TakePhoto from "../components/TakePhoto";
 export default function CreatePostScreen({ navigation }) {
     const [description, setDescription] = useState("");
     const [cameraOn, setCameraOn] = useState(false)
+    const [photo, setPhoto] = useState(null)
 
     const handleTakePhoto = () => {
         setCameraOn(true)
@@ -22,13 +35,19 @@ export default function CreatePostScreen({ navigation }) {
         setDescription(""); // Clear the input box
         navigation.navigate("FeedScreen"); // Navigate back to FeedScreen
     };
-    if (cameraOn) return <TakePhoto handleCloseCamera={()=>setCameraOn(false)}/>
+    const handlePhoto = (photo) =>{
+        setCameraOn(false)
+        setPhoto(photo)
+    }
+
+    if (cameraOn) return <TakePhoto handleCloseCamera={handlePhoto}/>
 
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
+
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.container}>
                     <TouchableOpacity
@@ -37,8 +56,11 @@ export default function CreatePostScreen({ navigation }) {
                     >
                         <MaterialIcons name="arrow-back" size={30} color="white" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.photoButton} onPress={handleTakePhoto}>
-                        <MaterialIcons name="photo-camera" size={60} color="white" />
+                    {photo && photo.uri && <Image source={{uri: photo.uri}}
+                                                  style={styles.postPhoto}
+                                                  resizeMode="cover"></Image>}
+                    <TouchableOpacity style={photo ? styles.photoButtonAfter : styles.photoButtonBefore} onPress={handleTakePhoto}>
+                        <MaterialIcons name="photo-camera" size={photo ? 30 : 60} color="white" />
                     </TouchableOpacity>
                     <TextInput
                         style={styles.textInput}
@@ -51,7 +73,7 @@ export default function CreatePostScreen({ navigation }) {
                         returnKeyType="done"
                         onSubmitEditing={Keyboard.dismiss}
                     />
-                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmitPost}>
+                    <TouchableOpacity style={styles.submitButton} onPress={()=>console.log(photo.uri)}>
                         <Text style={styles.submitText}>Submit Post</Text>
                     </TouchableOpacity>
                 </View>
@@ -68,7 +90,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         padding: 20,
     },
-    photoButton: {
+    photoButtonBefore: {
         width: 80,
         height: 80,
         backgroundColor: "#444",
@@ -76,6 +98,23 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 20,
+    },
+    photoButtonAfter:{
+        width: 50,
+        height: 50,
+        backgroundColor: "#444",
+        borderRadius: 40,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 20,
+    },
+    postPhoto:{
+        width: '50%',
+        height: '30%',
+        borderRadius: 15,
+        marginBottom: 25,
+        borderColor: "#C0c0c0",
+        borderWidth: 3
     },
     backButton: {
         position: "absolute",
