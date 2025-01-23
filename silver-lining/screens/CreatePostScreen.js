@@ -30,7 +30,7 @@ export default function CreatePostScreen({ navigation }) {
             Alert.alert("Missing Description", "Please write about your miracle before submitting.");
             return;
         }
-        // Logic for submitting the post goes here
+        // Logic for submitting the post goes herest
         Alert.alert("Post Submitted", "Your post has been successfully created!");
         setDescription(""); // Clear the input box
         navigation.navigate("FeedScreen"); // Navigate back to FeedScreen
