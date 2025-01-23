@@ -15,6 +15,30 @@ import {
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import PhotoPreview from "../components/PhotoPreview";
 import TakePhoto from "../components/TakePhoto";
+import * as FileSystem from "expo-file-system"
+
+const userDir = FileSystem.documentDirectory + 'user';
+const imageDir = FileSystem.documentDirectory + 'images';
+const userFilePath = `${userDir}/user.json`;
+
+
+const dirNames = [userDir, imageDir];
+
+const userJSON = async () =>{
+    const JSONData = await FileSystem.readAsStringAsync(userFilePath)
+    return JSON.parse(JSONData)
+}
+const ensureDirsExist = async (dirNames) => {
+    for (const dir of dirNames) {
+        const dirInfo = await FileSystem.getInfoAsync(dir);
+        if (!dirInfo.exists) {
+            console.log(`Directory ${dir} does not exist, creating ...`);
+            await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+        } else {
+            console.log(`${dir} exists`);
+        }
+    }
+};
 
 export default function CreatePostScreen({ navigation }) {
     const [description, setDescription] = useState("");
@@ -25,16 +49,39 @@ export default function CreatePostScreen({ navigation }) {
         setCameraOn(true)
     };
 
-    const handleSubmitPost = () => {
+    const handleSubmitPost = async () => {
         if (description.trim() === "") {
             Alert.alert("Missing Description", "Please write about your miracle before submitting.");
             return;
         }
         // Logic for submitting the post goes herest
+        ensureDirsExist(dirNames)
         Alert.alert("Post Submitted", "Your post has been successfully created!");
-        setDescription(""); // Clear the input box
-        navigation.navigate("FeedScreen"); // Navigate back to FeedScreen
+        savePhotoLocally()
+        await updateUserPosts()
+
     };
+    const updateUserPosts = async () =>{
+        const data = await userJSON()
+        console.log(data)
+    }
+    const savePhotoLocally = async () =>{
+        console.log("Running")
+        const photoFileName = photo.uri.split('/').pop()
+        const newUri = `${imageDir}/${photoFileName}`
+
+        try {
+            await FileSystem.moveAsync({
+                from: photo.uri,
+                to: newUri,
+            });
+
+            console.log(`Photo Saved at ${newUri}`);
+        } catch (error) {
+            console.error("Error saving photo:", error);
+        }
+
+    }
     const handlePhoto = (photo) =>{
         setCameraOn(false)
         setPhoto(photo)
@@ -73,7 +120,7 @@ export default function CreatePostScreen({ navigation }) {
                         returnKeyType="done"
                         onSubmitEditing={Keyboard.dismiss}
                     />
-                    <TouchableOpacity style={styles.submitButton} onPress={()=>console.log(photo.uri)}>
+                    <TouchableOpacity style={styles.submitButton} onPress={()=>handleSubmitPost()}>
                         <Text style={styles.submitText}>Submit Post</Text>
                     </TouchableOpacity>
                 </View>

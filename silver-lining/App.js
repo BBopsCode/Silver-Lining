@@ -16,12 +16,16 @@ const dirNames = [userDir, imageDir];
 
 const ensureDirsExist = async (dirNames) => {
     for (const dir of dirNames) {
-        const dirInfo = await FileSystem.getInfoAsync(dir);
-        if (!dirInfo.exists) {
-            console.log(`Directory ${dir} does not exist, creating ...`);
-            await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
-        } else {
-            console.log(`${dir} exists`);
+        try {
+            const dirInfo = await FileSystem.getInfoAsync(dir);
+            if (!dirInfo.exists) {
+                console.log(`Directory ${dir} does not exist, creating ...`);
+                await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+            } else {
+                console.log(`${dir} exists`);
+            }
+        } catch (error) {
+            console.error(`Error ensuring directory ${dir} exists:`, error);
         }
     }
 };
