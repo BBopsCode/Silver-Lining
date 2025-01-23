@@ -26,9 +26,32 @@ const ensureDirsExist = async (dirNames) => {
     }
 };
 
+const userFilePath = `${userDir}/user.json`;
+const ensureUserFilePath = async () =>{
+    const info = await FileSystem.getInfoAsync(userFilePath)
+    if (!info.exists){
+        console.log("User Info Does not Exist")
+        const defaultData =
+        {
+        "profile_data": {
+            "first": "Bryan",
+            "last": "Wilson",
+            "picture": "profile.png",
+        },
+        "posts":[]
+        }
+        await FileSystem.writeAsStringAsync(userFilePath, JSON.stringify(defaultData, null, 2))
+        console.log("User Created")
+    }else{
+        console.log("User File Exists")
+        const fileeContent = await FileSystem.readAsStringAsync(userFilePath)
+        console.log(JSON.parse(fileeContent))
+    }
+}
 export default function App() {
     useEffect(() => {
         ensureDirsExist(dirNames);
+        ensureUserFilePath()
     }, []);
 
     return (
