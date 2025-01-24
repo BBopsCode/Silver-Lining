@@ -13,21 +13,28 @@ import {
     Image
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import PhotoPreview from "../components/PhotoPreview";
 import TakePhoto from "../components/TakePhoto";
-import * as FileSystem from "expo-file-system"
+import * as FileSystem from "expo-file-system";
 
+// File system paths
 const userDir = FileSystem.documentDirectory + 'user';
 const imageDir = FileSystem.documentDirectory + 'images';
 const userFilePath = `${userDir}/user.json`;
-
-
 const dirNames = [userDir, imageDir];
 
-const userJSON = async () =>{
-    const JSONData = await FileSystem.readAsStringAsync(userFilePath)
-    return JSON.parse(JSONData)
-}
+/**
+ * Reads and parses the user JSON file.
+ * @returns Parsed user data.
+ */
+const userJSON = async () => {
+    const JSONData = await FileSystem.readAsStringAsync(userFilePath);
+    return JSON.parse(JSONData);
+};
+
+/**
+ * Ensures required directories exist; creates them if they do not.
+ * @param {string[]} dirNames - Array of directory paths.
+ */
 const ensureDirsExist = async (dirNames) => {
     for (const dir of dirNames) {
         const dirInfo = await FileSystem.getInfoAsync(dir);
@@ -40,82 +47,115 @@ const ensureDirsExist = async (dirNames) => {
     }
 };
 
+/**
+ * Main component for creating a post.
+ * @param navigation - Navigation object for navigating screens.
+ */
 export default function CreatePostScreen({ navigation }) {
     const [description, setDescription] = useState("");
-    const [cameraOn, setCameraOn] = useState(false)
-    const [photo, setPhoto] = useState(null)
+    const [cameraOn, setCameraOn] = useState(false);
+    const [photo, setPhoto] = useState(null);
 
+    /**
+     * Opens the camera to take a photo.
+     */
     const handleTakePhoto = () => {
-        setCameraOn(true)
+        setCameraOn(true);
     };
 
-    const handleSubmitPost = async () => {
-        if (description.trim() === "") {
-            Alert.alert("Missing Description", "Please write about your miracle before submitting.");
-            return;
-        }
-        // Logic for submitting the post goes herest
-        await ensureDirsExist(dirNames)
-        Alert.alert("Post Submitted", "Your post has been successfully created!");
-        await savePhotoLocally()
-
-    };
-    const updateUserPosts = async (photoLocation) =>{
-        const data = await userJSON()
-        data.posts.push({
-            "timestamp": new Date().toISOString(),
-            "description": description,
-            "imageFileLocation": photoLocation
-
-        })
-        await FileSystem.writeAsStringAsync(userFilePath, JSON.stringify(data,null,2))
-
-    }
-    const savePhotoLocally = async () =>{
-        console.log("Running")
-        const photoFileName = photo.uri.split('/').pop()
-        const newUri = `${imageDir}/${photoFileName}`
+    /**
+     * Saves the photo locally and updates the user's posts.
+     */
+    const savePhotoLocally = async () => {
+        const photoFileName = photo.uri.split('/').pop();
+        const newUri = `${imageDir}/${photoFileName}`;
 
         try {
             await FileSystem.moveAsync({
                 from: photo.uri,
                 to: newUri,
             });
-
-            console.log(`Photo Saved at ${newUri}`);
-            await updateUserPosts(newUri)
+            console.log(`Photo saved at ${newUri}`);
+            await updateUserPosts(newUri);
         } catch (error) {
             console.error("Error saving photo:", error);
         }
+    };
 
-    }
-    const handlePhoto = (photo) =>{
-        setCameraOn(false)
-        setPhoto(photo)
-    }
+    /**
+     * Updates the user's posts with a new post entry.
+     * @param {string} photoLocation - Path to the saved photo.
+     */
+    const updateUserPosts = async (photoLocation) => {
+        const data = await userJSON();
+        data.posts.push({
+            timestamp: new Date().toISOString(),
+            description: description,
+            imageFileLocation: photoLocation,
+        });
+        await FileSystem.writeAsStringAsync(userFilePath, JSON.stringify(data, null, 2));
+    };
 
-    if (cameraOn) return <TakePhoto handleCloseCamera={handlePhoto}/>
+    /**
+     * Handles submitting the post, ensuring directories exist and saving data.
+     */
+    const handleSubmitPost = async () => {
+        if (description.trim() === "") {
+            Alert.alert("Missing Description", "Please write about your miracle before submitting.");
+            return;
+        }
+
+        await ensureDirsExist(dirNames);
+        await savePhotoLocally();
+        Alert.alert("Post Submitted", "Your post has been successfully created!");
+        navigation.navigate("FeedScreen")
+    };
+
+    /**
+     * Handles receiving the photo from the camera.
+     * @param photo - Photo object returned by the camera.
+     */
+    const handlePhoto = (photo) => {
+        setCameraOn(false);
+        setPhoto(photo);
+    };
+
+    // Show camera if it is enabled
+    if (cameraOn) return <TakePhoto handleCloseCamera={handlePhoto} />;
 
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.container}>
+                    {/* Back Button */}
                     <TouchableOpacity
                         onPress={() => navigation.navigate("FeedScreen")}
                         style={styles.backButton}
                     >
                         <MaterialIcons name="arrow-back" size={30} color="white" />
                     </TouchableOpacity>
-                    {photo && photo.uri && <Image source={{uri: photo.uri}}
-                                                  style={styles.postPhoto}
-                                                  resizeMode="cover"></Image>}
-                    <TouchableOpacity style={photo ? styles.photoButtonAfter : styles.photoButtonBefore} onPress={handleTakePhoto}>
+
+                    {/* Display photo if available */}
+                    {photo && photo.uri && (
+                        <Image
+                            source={{ uri: photo.uri }}
+                            style={styles.postPhoto}
+                            resizeMode="cover"
+                        />
+                    )}
+
+                    {/* Button to open the camera */}
+                    <TouchableOpacity
+                        style={photo ? styles.photoButtonAfter : styles.photoButtonBefore}
+                        onPress={handleTakePhoto}
+                    >
                         <MaterialIcons name="photo-camera" size={photo ? 30 : 60} color="white" />
                     </TouchableOpacity>
+
+                    {/* Input for post description */}
                     <TextInput
                         style={styles.textInput}
                         placeholder="Write about your miracle..."
@@ -127,7 +167,9 @@ export default function CreatePostScreen({ navigation }) {
                         returnKeyType="done"
                         onSubmitEditing={Keyboard.dismiss}
                     />
-                    <TouchableOpacity style={styles.submitButton} onPress={()=>handleSubmitPost()}>
+
+                    {/* Submit post button */}
+                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmitPost}>
                         <Text style={styles.submitText}>Submit Post</Text>
                     </TouchableOpacity>
                 </View>
@@ -136,6 +178,7 @@ export default function CreatePostScreen({ navigation }) {
     );
 }
 
+// Styles
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -153,7 +196,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         marginBottom: 20,
     },
-    photoButtonAfter:{
+    photoButtonAfter: {
         width: 50,
         height: 50,
         backgroundColor: "#444",
@@ -162,13 +205,13 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         marginBottom: 20,
     },
-    postPhoto:{
-        width: '50%',
-        height: '30%',
+    postPhoto: {
+        width: "50%",
+        height: "30%",
         borderRadius: 15,
         marginBottom: 25,
         borderColor: "#C0c0c0",
-        borderWidth: 3
+        borderWidth: 3,
     },
     backButton: {
         position: "absolute",

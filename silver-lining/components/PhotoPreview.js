@@ -4,9 +4,9 @@ import React from 'react'
 import { TouchableOpacity, SafeAreaView, Image, StyleSheet, View } from 'react-native';
 
 const PhotoPreview = ({
-    photo,
-    handleRetakePhoto,
-    handlePhotoKept
+    photo, //Photo that was taken
+    handleRetakePhoto, //Function to RetakePhoto
+    handlePhotoKept //Function to handle if the photo is Kept
 
 }) => (
     <SafeAreaView style={styles.container}>
@@ -18,9 +18,13 @@ const PhotoPreview = ({
         </View>
 
         <View style={styles.buttonContainer}>
+            {/* Trashcan buttton takes you back to the camera to retake photo*/}
             <TouchableOpacity style={styles.button} onPress={handleRetakePhoto}>
                 <Fontisto name='trash' size={36} color='black' />
             </TouchableOpacity>
+
+            {/* Check mark saves the uri of the photo and takes you back to the create post screen
+            showing your photo there*/}
            <TouchableOpacity style={[styles.button, { backgroundColor: '#4261C7' }]} onPress={handlePhotoKept}>
                 <Fontisto name='check' size={26} color='white' />
             </TouchableOpacity>

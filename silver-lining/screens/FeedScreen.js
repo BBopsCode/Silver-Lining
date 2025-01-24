@@ -7,30 +7,48 @@ import { posts } from '../data/posts.json';
 const profilePicture = require("../data/profile.png");
 const logo = require("../assets/Logo.png");
 
+/**
+ * Renders a single post item in the FlatList.
+ * @param {Object} postData - Contains the data of the post to render.
+ * @returns {JSX.Element} A Post component.
+ */
 function renderPost(postData) {
     return (
-        <Post image={postData.item.image} caption={postData.item.caption}></Post>
+        <Post image={postData.item.image} caption={postData.item.caption} />
     );
 }
 
+/**
+ * Main feed screen of the app.
+ * Displays a header, a feed of posts, and a button to create a post.
+ * @param  navigation - Navigation object for navigating between screens.
+ * @returns The FeedScreen component.
+ */
 function FeedScreen({ navigation }) {
     return (
         <SafeAreaView style={styles.safeArea}>
+            {/* Header with app logo and profile picture */}
             <View style={styles.header}>
                 <Image source={logo} style={styles.logo} />
                 <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
                     <Image source={profilePicture} style={styles.profilePicture} />
                 </TouchableOpacity>
             </View>
+
+            {/* Feed container with posts */}
             <View style={styles.feedContainer}>
                 <FlatList
                     style={styles.feedList}
                     data={posts}
-                    renderItem={renderPost}>
-                </FlatList>
+                    renderItem={renderPost}
+                />
             </View>
 
-            <TouchableOpacity style={styles.prayerButton} onPress={() =>  navigation.navigate("CreatePost")}>
+            {/* Floating button to navigate to the Create Post screen */}
+            <TouchableOpacity
+                style={styles.prayerButton}
+                onPress={() => navigation.navigate("CreatePost")}
+            >
                 <Text style={styles.prayerText}>🙏</Text>
             </TouchableOpacity>
         </SafeAreaView>
@@ -40,7 +58,7 @@ function FeedScreen({ navigation }) {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: "#000",  // Set background to black
+        backgroundColor: "#000", // Set background to black
     },
     header: {
         flexDirection: "row",
@@ -48,7 +66,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingHorizontal: 16,
         paddingVertical: 10,
-        backgroundColor: "#000",  // Header background color
+        backgroundColor: "#000", // Header background color
     },
     logo: {
         width: 100,
@@ -66,20 +84,20 @@ const styles = StyleSheet.create({
     },
     feedContainer: {
         flex: 1,
-        justifyContent: 'flex-start',
+        justifyContent: "flex-start",
     },
     prayerButton: {
         position: "absolute",
         bottom: 20,
         right: 20,
-        backgroundColor: '#89CFF0',
+        backgroundColor: "#89CFF0",
         padding: 15,
         borderRadius: 50,
     },
     prayerText: {
         fontSize: 40,
         color: "white",
-    }
+    },
 });
 
 export default FeedScreen;

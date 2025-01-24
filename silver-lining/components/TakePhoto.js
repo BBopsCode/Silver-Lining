@@ -6,36 +6,43 @@ import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import photoPreview from "../components/PhotoPreview";
 
+//
+/**
+ * TakePhoto component for capturing photos
+ * @param {handleCloseCamera} handleCloseCamera - function to close the camera if photo is kept
+ */
 export default function TakePhoto({
-                                      navigation,
-    handleCloseCamera
-}) {
-    const [facing, setFacing] = useState('back');
-    const [permission, requestPermission] = useCameraPermissions();
-    const [photo, setPhoto] = useState(null);
-    const [preview, setPreview] = useState(null)
-    const cameraRef = useRef(null);
+                                      handleCloseCamera
+                                  }) {
+    // State variables
+    const [facing, setFacing] = useState('back'); // Set initial camera facing to 'back'
+    const [permission, requestPermission] = useCameraPermissions(); // Hook for camera permissions
+    const [photo, setPhoto] = useState(null); // Store the captured photo
+    const [preview, setPreview] = useState(null); // Store whether the preview is visible
+    const cameraRef = useRef(null); // Ref to access the camera component
 
+    // If permission is still loading, return an empty view
     if (!permission) {
-        // Camera permissions are still loading.
         return <View />;
     }
 
+    // If permission is not granted, show a message and button to request permission
     if (!permission.granted) {
-        // Camera permissions are not granted yet.
         return (
             <View style={styles.container}>
                 <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
-                <Button onPress={requestPermission} title="grant permission" />
+                <Button onPress={requestPermission} title="Grant Permission" />
             </View>
         );
     }
 
+    // Function to toggle between front and back camera
     function toggleCameraFacing() {
         setFacing(current => (current === 'back' ? 'front' : 'back'));
     }
 
-    const handleTakePhoto =  async () => {
+    // Function to capture a photo
+    const handleTakePhoto = async () => {
         if (cameraRef.current) {
             const options = {
                 quality: 1,
@@ -44,19 +51,26 @@ export default function TakePhoto({
             };
             const takedPhoto = await cameraRef.current.takePictureAsync(options);
 
-            setPreview(true)
-            setPhoto(takedPhoto);
+            setPreview(true); // Show the preview after taking the photo
+            setPhoto(takedPhoto); // Store the captured photo
         }
     };
 
+    // Function to allow the user to retake the photo
     const handleRetakePhoto = () => {
-        setPreview(false)
+        setPreview(false); // Hide preview and allow retake
     };
+
+    // Function to hide the preview and close the camera
     const hidePreview = () => {
-        setPreview(false);
-        handleCloseCamera(photo)
+        setPreview(false); // Hide the preview
+        handleCloseCamera(photo); // Close the camera and pass the photo back
     }
+
+    // If a photo is taken and preview is visible, show the PhotoPreview component
     if (photo && preview) return <PhotoPreview photo={photo} handleRetakePhoto={handleRetakePhoto} handlePhotoKept={hidePreview} />
+
+    // Render the camera view when no photo is taken
     return (
         <View style={styles.container}>
             <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
