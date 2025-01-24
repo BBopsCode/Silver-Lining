@@ -22,15 +22,21 @@ function ProfileScreen({navigation}) {
     useEffect(()=>{
         const initializeData = async () =>{
             const data = await userJSON()
+            console.log("Data from post", data)
             setPostData(data)
         }
         initializeData();
 
     },[])
+    useEffect(() => {
+        console.log("DATA:")
+        console.log(postData)
+    }, [postData]);
 
     const imageSources = {
         "profile.png": require('../data/profile.png'),
     };
+
     const clearPosts = async () =>{
         postData.posts = []
         await FileSystem.writeAsStringAsync(userFilePath, JSON.stringify(postData, null, 2))
@@ -50,7 +56,7 @@ function ProfileScreen({navigation}) {
             <Text style={styles.greetingText}>Hello, {user.profile_data.first}! 👋</Text>
             <Text style={styles.pinsText}>📌 Pins</Text>
             <Button title={"Clear Posts"} onPress={clearPosts}></Button>
-            <ProfileScreenPosts postData={postData}></ProfileScreenPosts>
+            {postData && <ProfileScreenPosts postData={postData}></ProfileScreenPosts>}
         </SafeAreaView>
     );
 }

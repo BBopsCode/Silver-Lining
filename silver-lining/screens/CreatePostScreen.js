@@ -68,7 +68,6 @@ export default function CreatePostScreen({ navigation }) {
             "imageFileLocation": photoLocation
 
         })
-        console.log(data.posts)
         await FileSystem.writeAsStringAsync(userFilePath, JSON.stringify(data,null,2))
 
     }
