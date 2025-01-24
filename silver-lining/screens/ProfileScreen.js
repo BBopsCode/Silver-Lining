@@ -2,27 +2,40 @@ import {Image, View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Button} f
 import user from '../data/user.json';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as FileSystem from "expo-file-system"
+import ProfileScreenPosts from "../components/ProfileScreenPosts";
+import {useEffect, useState} from "react";
 
 const userDir = FileSystem.documentDirectory + 'user';
 const imageDir = FileSystem.documentDirectory + 'images';
 const userFilePath = `${userDir}/user.json`;
 
-const userJSON = async () =>{
-    const JSONData = await FileSystem.readAsStringAsync(userFilePath)
-    return JSON.parse(JSONData)
-}
 
-const imageSources = {
-    "profile.png": require('../data/profile.png'),
-};
-const clearPosts = async () =>{
-    const data = await userJSON()
-    data.posts = []
-    await FileSystem.writeAsStringAsync(userFilePath, JSON.stringify(data, null, 2))
-    console.log(data)
-}
 
 function ProfileScreen({navigation}) {
+    const [postData, setPostData] = useState(null)
+
+    const userJSON = async () =>{
+        const JSONData = await FileSystem.readAsStringAsync(userFilePath)
+        return JSON.parse(JSONData)
+    }
+
+    useEffect(()=>{
+        const initializeData = async () =>{
+            const data = await userJSON()
+            setPostData(data)
+        }
+        initializeData();
+
+    },[])
+
+    const imageSources = {
+        "profile.png": require('../data/profile.png'),
+    };
+    const clearPosts = async () =>{
+        postData.posts = []
+        await FileSystem.writeAsStringAsync(userFilePath, JSON.stringify(postData, null, 2))
+        console.log(postData)
+    }
     const picture = user.profile_data.picture;
 
     return (
@@ -37,6 +50,7 @@ function ProfileScreen({navigation}) {
             <Text style={styles.greetingText}>Hello, {user.profile_data.first}! 👋</Text>
             <Text style={styles.pinsText}>📌 Pins</Text>
             <Button title={"Clear Posts"} onPress={clearPosts}></Button>
+            <ProfileScreenPosts postData={postData}></ProfileScreenPosts>
         </SafeAreaView>
     );
 }
