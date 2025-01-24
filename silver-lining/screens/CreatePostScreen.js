@@ -56,22 +56,23 @@ export default function CreatePostScreen({ navigation }) {
             return;
         }
         // Logic for submitting the post goes herest
-        ensureDirsExist(dirNames)
+        await ensureDirsExist(dirNames)
         Alert.alert("Post Submitted", "Your post has been successfully created!");
-        savePhotoLocally()
+        await savePhotoLocally()
         await updateUserPosts()
 
     };
     const updateUserPosts = async () =>{
         const data = await userJSON()
-        console.log(data.posts)
         data.posts.push({
             "timestamp": new Date().toISOString(),
             "description": description,
             "imageFileLocation": photoLocation
 
         })
+        console.log(data.posts)
         await FileSystem.writeAsStringAsync(userFilePath, JSON.stringify(data,null,2))
+
     }
     const savePhotoLocally = async () =>{
         console.log("Running")
