@@ -11,7 +11,7 @@ function Post({ image, caption }) {
                 resizeMode="cover" // Ensure the image covers the area without distorting
             />
             {/* Display the image URI as text */}
-            <Text style={{ color: 'white' }}>{image}</Text>
+
             {/* Display the caption, defaulting to "Default" if not provided, with dynamic style based on caption presence */}
             <Text style={caption ? styles.styleWhite : styles.styleBlue}>
                 {caption || "Default"} {/* Show caption or default text */}
