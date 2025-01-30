@@ -5,8 +5,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import CreatePostScreen from './screens/CreatePostScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import FeedScreen from './screens/FeedScreen';
+import LoginScreen from "./screens/LoginScreen";
 import * as FileSystem from 'expo-file-system';
 import { useEffect } from 'react';
+import SignupScreen from "./screens/SignupScreen";
 
 const Stack = createStackNavigator();
 
@@ -77,7 +79,21 @@ export default function App() {
     return (
         <View style={styles.container}>
             <NavigationContainer>
-                <Stack.Navigator id="1">
+                <Stack.Navigator id="1" initialRouteName={"Login"}>
+                    <Stack.Screen
+                        name="Login"
+                        component={LoginScreen}
+                        options={{
+                            headerShown: false,
+                            cardStyle: { backgroundColor: '#000' },
+                        }}/>
+                    <Stack.Screen name={'Signup'}
+                                  component={SignupScreen}
+                                    options={{
+                                        headerShown: false,
+                                        cardStyle: { backgroundColor: '#000' },
+                                    }}
+                    />
                     <Stack.Screen
                         name="FeedScreen"
                         component={FeedScreen}
