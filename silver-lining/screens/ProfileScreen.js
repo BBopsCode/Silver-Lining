@@ -4,13 +4,39 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as FileSystem from "expo-file-system";
 import ProfileScreenPosts from "../components/ProfileComponents/ProfileScreenPosts";
 import { useEffect, useState } from "react";
-
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import {auth, db} from "../util/FirebaseConfig";
 // Directory and file paths
 const userDir = FileSystem.documentDirectory + 'user';
 const userFilePath = `${userDir}/user.json`;
+const currentUser = auth.currentUser;
+
 
 // ProfileScreen Component
 function ProfileScreen({ navigation }) {
+
+    useEffect(() => {
+        if (currentUser) {
+            const userUid = currentUser.uid;
+            const postCollectionRef = collection(db, "posts");
+            const q = query(postCollectionRef, where("userId", "==", userUid));
+
+            getDocs(q)
+                .then((querySnapshot) => {
+                    if (querySnapshot.empty) {
+                        console.log("No posts found for this user.");
+                    } else {
+                        querySnapshot.forEach((doc) => {
+                            console.log(`Post ID: ${doc.id}, Data:`, doc.data());
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching posts:", error);
+                });
+        }
+    }, []);
     // State for post data
     const [postData, setPostData] = useState(null);
 
@@ -24,16 +50,12 @@ function ProfileScreen({ navigation }) {
     useEffect(() => {
         const initializeData = async () => {
             const data = await userJSON();
-            console.log("Data from post", data);
             setPostData(data);
         };
         initializeData();
     }, []);
 
-    // Effect to log post data whenever it changes
-    useEffect(() => {
-        console.log("Post Data:", postData);
-    }, [postData]);
+
 
     // Image sources for the profile picture
     const imageSources = {
