@@ -36,4 +36,4 @@ yarn-error.*
 *.tsbuildinfo
 
 #Firebase
-silver-lining/FirebaseConfig.js
+silver-lining/util/FirebaseConfig.js

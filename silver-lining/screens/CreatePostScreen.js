@@ -13,8 +13,12 @@ import {
     Image
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import TakePhoto from "../components/TakePhoto";
+import TakePhoto from "../components/PostComponents/TakePhoto";
 import * as FileSystem from "expo-file-system";
+import {getAuth} from "firebase/auth";
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
+import { db } from "../util/FirebaseConfig"
+import { v4 as uuidv4 } from "react-native-uuid";
 
 // File system paths
 const userDir = FileSystem.documentDirectory + 'user';
@@ -52,10 +56,25 @@ const ensureDirsExist = async (dirNames) => {
  * @param navigation - Navigation object for navigating screens.
  */
 export default function CreatePostScreen({ navigation }) {
+    const auth = getAuth()
+    const user = auth.currentUser
     const [description, setDescription] = useState("");
     const [cameraOn, setCameraOn] = useState(false);
     const [photo, setPhoto] = useState(null);
 
+    const userPostCollection = collection(db, 'posts')
+
+    const addPost = async () => {
+    if (user) {
+        try {
+            await addDoc(userPostCollection, { description, userId: user.uid });
+        } catch (error) {
+            console.error("Error adding post:", error);
+            Alert.alert("Error", "There was an error submitting your post. Please try again.");
+            console.log(user)
+        }
+    }
+};
     /**
      * Opens the camera to take a photo.
      */
@@ -75,7 +94,6 @@ export default function CreatePostScreen({ navigation }) {
                 from: photo.uri,
                 to: newUri,
             });
-            console.log(`Photo saved at ${newUri}`);
             await updateUserPosts(newUri);
         } catch (error) {
             console.error("Error saving photo:", error);
@@ -107,6 +125,7 @@ export default function CreatePostScreen({ navigation }) {
 
         await ensureDirsExist(dirNames);
         await savePhotoLocally();
+        await addPost()
         Alert.alert("Post Submitted", "Your post has been successfully created!");
         navigation.navigate("FeedScreen")
     };

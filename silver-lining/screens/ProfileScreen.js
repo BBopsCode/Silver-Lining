@@ -2,7 +2,7 @@ import { Image, View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Button }
 import user from '../data/user.json';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as FileSystem from "expo-file-system";
-import ProfileScreenPosts from "../components/ProfileScreenPosts";
+import ProfileScreenPosts from "../components/ProfileComponents/ProfileScreenPosts";
 import { useEffect, useState } from "react";
 
 // Directory and file paths

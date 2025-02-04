@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Image, SafeAreaView, FlatList, TouchableOpacity, Text } from "react-native";
 import user from "../data/user.json";
-import Post from "../components/Post";
+import Post from "../components/PostComponents/Post";
 import { posts } from '../data/posts.json';
 
 const profilePicture = require("../data/profile.png");
