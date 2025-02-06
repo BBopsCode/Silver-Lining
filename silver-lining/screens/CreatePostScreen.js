@@ -55,7 +55,7 @@ const ensureDirsExist = async (dirNames) => {
  * Main component for creating a post.
  * @param navigation - Navigation object for navigating screens.
  */
-export default function CreatePostScreen({ navigation }) {
+export default function CreatePostScreen({ navigation, userId }) {
     const auth = getAuth()
     const user = auth.currentUser
     const [description, setDescription] = useState("");
