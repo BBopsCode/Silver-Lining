@@ -1,8 +1,9 @@
-import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../util/FirebaseConfig";
+import { getFirestore, collection, query, where, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject, listAll } from "firebase/storage";
+import { auth } from "../util/FirebaseConfig";
 import { StyleSheet, Image, FlatList, Alert, TouchableOpacity, SafeAreaView, Text, View } from 'react-native';
-import { storage, auth } from "../util/FirebaseConfig"
-import { getDownloadURL, ref, uploadBytes, listAll, deleteObject } from 'firebase/storage';
+import { db, storage } from "../util/FirebaseConfig";
+
 
 export const fetchPosts = async (userId) => {
     const postCollectionRef = collection(db, "posts");
@@ -42,4 +43,27 @@ export const uploadImage = async (image, user) =>{
         console.error("Error uploading image: ", error);
         Alert.alert('Upload failed!', error.message);
     }
+}
+
+export const clearUserPosts =async (user)=>{
+    const postCollectionRef = collection(db, "posts");
+    const q = query(postCollectionRef, where("userId", "==", user));
+
+    try {
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            console.log("No posts found for this user.");
+            return [];
+        } else {
+            for (const post of querySnapshot.docs){
+                const postRef = doc(db,"posts", post.id)
+                await deleteDoc(postRef)
+            }
+        }
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+        return [];
+    }
+
+
 }

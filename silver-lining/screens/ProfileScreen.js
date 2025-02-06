@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchPosts } from '../helpers/firebasePostHelper'; // Firebase helper
-import { readUserData, clearUserPosts } from '../helpers/userDataHelperPosts'; // User data helper
+import { readUserData } from '../helpers/userDataHelperPosts';
+import {clearUserPosts} from "../helpers/firebasePostHelper";// User data helper
 import { getAuth } from "firebase/auth";
 import { auth } from "../util/FirebaseConfig";
 import ProfileScreenPosts from "../components/ProfileComponents/ProfileScreenPosts";
@@ -35,7 +36,7 @@ function ProfileScreen({ navigation }) {
         if (userId) {
             fetchPosts(userId).then(fetchedPosts => {
                 setPostData(fetchedPosts); // Update postData state
-                console.log("True Data",postData)
+
             });
         }
     }, [userId]);
@@ -63,7 +64,8 @@ function ProfileScreen({ navigation }) {
 
     // Clear user posts
     const clearPosts = async () => {
-        await clearUserPosts(postData); // Clear posts in local storage
+
+        await clearUserPosts(userId); // Clear posts in local storage
         // Sign the user out after clearing posts
     };
 
