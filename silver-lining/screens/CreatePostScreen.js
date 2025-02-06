@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
     View,
     TextInput,
@@ -19,12 +19,18 @@ import {getAuth} from "firebase/auth";
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db } from "../util/FirebaseConfig"
 import { v4 as uuidv4 } from "react-native-uuid";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {getUserIdFromStorage} from "../helpers/userDataHelperPosts";
+import {uploadImage} from "../helpers/firebasePostHelper";
 
 // File system paths
 const userDir = FileSystem.documentDirectory + 'user';
 const imageDir = FileSystem.documentDirectory + 'images';
 const userFilePath = `${userDir}/user.json`;
 const dirNames = [userDir, imageDir];
+
+
+
 
 /**
  * Reads and parses the user JSON file.
@@ -51,23 +57,32 @@ const ensureDirsExist = async (dirNames) => {
     }
 };
 
+
 /**
  * Main component for creating a post.
  * @param navigation - Navigation object for navigating screens.
  */
-export default function CreatePostScreen({ navigation, userId }) {
-    const auth = getAuth()
-    const user = auth.currentUser
+export default function CreatePostScreen({ navigation }) {
     const [description, setDescription] = useState("");
     const [cameraOn, setCameraOn] = useState(false);
     const [photo, setPhoto] = useState(null);
+    const [userId, setUserId] = useState(null);
+
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            const id = await getUserIdFromStorage(); // Retrieve userId from AsyncStorage
+            setUserId(id);
+        };
+        fetchUserId();
+    }, []);
 
     const userPostCollection = collection(db, 'posts')
 
     const addPost = async () => {
-    if (user) {
+    if (userId) {
         try {
-            await addDoc(userPostCollection, { description, userId: user.uid });
+         await addDoc(userPostCollection, { description, userId: userId, timestamp: new Date().toISOString() });
         } catch (error) {
             console.error("Error adding post:", error);
             Alert.alert("Error", "There was an error submitting your post. Please try again.");
@@ -85,21 +100,23 @@ export default function CreatePostScreen({ navigation, userId }) {
     /**
      * Saves the photo locally and updates the user's posts.
      */
-    const savePhotoLocally = async () => {
-        const photoFileName = photo.uri.split('/').pop();
-        const newUri = `${imageDir}/${photoFileName}`;
-
-        try {
-            await FileSystem.moveAsync({
-                from: photo.uri,
-                to: newUri,
-            });
-            await updateUserPosts(newUri);
-        } catch (error) {
-            console.error("Error saving photo:", error);
-        }
-    };
-
+    // const savePhotoLocally = async () => {
+    //     const photoFileName = photo.uri.split('/').pop();
+    //     const newUri = `${imageDir}/${photoFileName}`;
+    //
+    //     try {
+    //         await FileSystem.moveAsync({
+    //             from: photo.uri,
+    //             to: newUri,
+    //         });
+    //         await updateUserPosts(newUri);
+    //     } catch (error) {
+    //         console.error("Error saving photo:", error);
+    //     }
+    // };
+    const savePhotoToCloud = async () => {
+        await uploadImage(photo.uri, userId)
+        };
     /**
      * Updates the user's posts with a new post entry.
      * @param {string} photoLocation - Path to the saved photo.
@@ -124,8 +141,8 @@ export default function CreatePostScreen({ navigation, userId }) {
         }
 
         await ensureDirsExist(dirNames);
-        await savePhotoLocally();
         await addPost()
+        await savePhotoToCloud()
         Alert.alert("Post Submitted", "Your post has been successfully created!");
         navigation.navigate("FeedScreen")
     };

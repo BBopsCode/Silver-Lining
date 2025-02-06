@@ -1,11 +1,14 @@
 import { FlatList, View, Text, Image, StyleSheet } from "react-native";
 import post from "../PostComponents/Post";
+import {useEffect} from "react";
 
 /**
  * Render function for each item in the FlatList, displaying an image.
  * @param {item} postData.posts[i]
  */
+
 const renderItem = ({ item }) => (
+
     <View>
         {/* Display image from the provided URI */}
         <Image
@@ -21,13 +24,13 @@ const renderItem = ({ item }) => (
  */
 export default function ProfileScreenPosts({ postData }) {
     //Needed to display posts on user profile to show correct order
-    const sortedPosts = postData.posts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    // const sortedPosts = postData.posts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     return (
         <View>
             {/* FlatList to render posts in multiple columns */}
             <FlatList
-                data={sortedPosts}
+                data={postData.posts}
                 renderItem={renderItem}
                 numColumns={3} // Display posts in 3 columns
             />

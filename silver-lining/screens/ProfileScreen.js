@@ -1,36 +1,19 @@
 import { Image, View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Button } from 'react-native';
-import user from '../data/user.json';
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import * as FileSystem from "expo-file-system";
-import ProfileScreenPosts from "../components/ProfileComponents/ProfileScreenPosts";
 import { useEffect, useState } from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Add AsyncStorage import
-import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchPosts } from '../helpers/firebasePostHelper'; // Firebase helper
+import { readUserData, clearUserPosts } from '../helpers/userDataHelperPosts'; // User data helper
 import { getAuth } from "firebase/auth";
-import {auth, db} from "../util/FirebaseConfig";
-// Directory and file paths
-const userDir = FileSystem.documentDirectory + 'user';
-const userFilePath = `${userDir}/user.json`;
+import { auth } from "../util/FirebaseConfig";
+import ProfileScreenPosts from "../components/ProfileComponents/ProfileScreenPosts";
 
 // ProfileScreen Component
 function ProfileScreen({ navigation }) {
-
-    const handleSignOut = async () => {
-        try {
-            await auth.signOut(); // Firebase sign-out method
-            await AsyncStorage.removeItem('userId'); // Remove the userId from AsyncStorage
-            console.log("User signed out.");
-            navigation.navigate("Auth"); // Navigate to the login screen or another screen
-        } catch (error) {
-            console.error("Error signing out:", error);
-        }
-    };
-
     const [userId, setUserId] = useState(null);  // State for storing userId
     const [postData, setPostData] = useState(null); // State for storing posts data
-    const currentUser = auth.currentUser;
 
-    // Function to fetch userId from AsyncStorage
+    // Fetch userId from AsyncStorage
     const getUserIdFromStorage = async () => {
         try {
             const storedUserId = await AsyncStorage.getItem('userId');
@@ -42,64 +25,52 @@ function ProfileScreen({ navigation }) {
         }
     };
 
-    // Effect to initialize data and fetch userId on component mount
+    // Initialize data and fetch userId on component mount
     useEffect(() => {
         getUserIdFromStorage(); // Retrieve userId from AsyncStorage
     }, []);
 
-    // Fetch posts from Firestore
+    // Fetch posts from Firestore when userId is available
     useEffect(() => {
         if (userId) {
-            const postCollectionRef = collection(db, "posts");
-            const q = query(postCollectionRef, where("userId", "==", userId));
-
-            getDocs(q)
-                .then((querySnapshot) => {
-                    if (querySnapshot.empty) {
-                        console.log("No posts found for this user.");
-                    } else {
-                        querySnapshot.forEach((doc) => {
-                            console.log(`Post ID: ${doc.id}, Data:`, doc.data());
-                        });
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error fetching posts:", error);
-                });
+            fetchPosts(userId).then(fetchedPosts => {
+                setPostData(fetchedPosts); // Update postData state
+                console.log("True Data",postData)
+            });
         }
     }, [userId]);
 
-    // Function to fetch user JSON data
-    const userJSON = async () => {
-        const JSONData = await FileSystem.readAsStringAsync(userFilePath);
-        return JSON.parse(JSONData);
-    };
-
-    // Effect to initialize data for posts
+    // Function to fetch user JSON data from local storage
     useEffect(() => {
         const initializeData = async () => {
-            const data = await userJSON();
-            setPostData(data);
+            const data = await readUserData(); // Read user data
+            setPostData(data); // Set post data in the state
         };
         initializeData();
     }, []);
 
-    // Image sources for the profile picture
+    // Handle user sign-out
+    const handleSignOut = async () => {
+        try {
+            await auth.signOut(); // Firebase sign-out method
+            await AsyncStorage.removeItem('userId'); // Remove userId from AsyncStorage
+            console.log("User signed out.");
+            navigation.navigate("Auth"); // Navigate to login screen or another screen
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
+    };
+
+    // Clear user posts
+    const clearPosts = async () => {
+        await clearUserPosts(postData); // Clear posts in local storage
+        // Sign the user out after clearing posts
+    };
+
+    // Profile picture and greeting text
     const imageSources = {
         "profile.png": require('../data/profile.png'),
     };
-
-    // Function to clear all posts
-    const clearPosts = async () => {
-        postData.posts = []; // Clear posts in the local state
-        await FileSystem.writeAsStringAsync(userFilePath, JSON.stringify(postData, null, 2)); // Save changes to file
-        console.log("Posts cleared:", postData);
-
-        await handleSignOut()
-    };
-
-    // Profile picture path
-    const picture = user.profile_data.picture;
 
     // Component rendering
     return (
@@ -114,12 +85,12 @@ function ProfileScreen({ navigation }) {
 
             {/* Profile picture */}
             <Image
-                source={imageSources[picture]}
+                source={imageSources["profile.png"]}
                 style={styles.profileImage}
             />
 
             {/* User greeting and pins */}
-            <Text style={styles.greetingText}>Hello, {user.profile_data.first}! 👋</Text>
+            <Text style={styles.greetingText}>Hello, {auth.currentUser.displayName || 'User'}! 👋</Text>
             <Text style={styles.pinsText}>📌 Pins</Text>
 
             {/* Clear posts button */}
