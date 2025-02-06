@@ -39,6 +39,8 @@ export const uploadImage = async (image, user) =>{
         const storageRef = ref(storage, `images/${user}/${Date.now()}`);
         await uploadBytes(storageRef, blob);
 
+        const downloadRef = getDownloadURL(storageRef)
+
     } catch (error) {
         console.error("Error uploading image: ", error);
         Alert.alert('Upload failed!', error.message);
@@ -66,4 +68,23 @@ export const clearUserPosts =async (user)=>{
     }
 
 
+}
+
+export const fetchAllPosts = async () =>{
+    const postCollectionRef = collection(db, "posts")
+    const q = query(postCollectionRef)
+
+    try {
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            console.log("No posts found! Invite some friends :)");
+            return [];
+        } else {
+            const results = querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+            console.log(results)
+        }
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+        return [];
+    }
 }

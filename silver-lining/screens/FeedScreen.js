@@ -1,8 +1,10 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { View, StyleSheet, Image, SafeAreaView, FlatList, TouchableOpacity, Text } from "react-native";
 import user from "../data/user.json";
 import Post from "../components/PostComponents/Post";
 import { posts } from '../data/posts.json';
+import {getUserIdFromStorage} from "../helpers/userDataHelperPosts";
+import {fetchAllPosts} from "../helpers/firebasePostHelper";
 
 const profilePicture = require("../data/profile.png");
 const logo = require("../assets/Logo.png");
@@ -25,6 +27,22 @@ function renderPost(postData) {
  * @returns The FeedScreen component.
  */
 function FeedScreen({ navigation }) {
+    const [userId, setUserId] = useState(null)
+    const [posts, setPosts] = useState(null)
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            const id = await getUserIdFromStorage(); // Retrieve userId from AsyncStorage
+            setUserId(id);
+        };
+
+        const fetchAllPostsFromFirebase = async () =>{
+            await fetchAllPosts()
+        }
+        fetchUserId();
+        fetchAllPostsFromFirebase()
+    }, []);
+
     return (
         <SafeAreaView style={styles.safeArea}>
             {/* Header with app logo and profile picture */}
@@ -37,11 +55,11 @@ function FeedScreen({ navigation }) {
 
             {/* Feed container with posts */}
             <View style={styles.feedContainer}>
-                <FlatList
-                    style={styles.feedList}
-                    data={posts}
-                    renderItem={renderPost}
-                />
+                {/*<FlatList*/}
+                {/*    style={styles.feedList}*/}
+                {/*    data={posts}*/}
+                {/*    renderItem={renderPost}*/}
+                {/*/>*/}
             </View>
 
             {/* Floating button to navigate to the Create Post screen */}
