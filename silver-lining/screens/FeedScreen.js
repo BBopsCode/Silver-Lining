@@ -16,7 +16,7 @@ const logo = require("../assets/Logo.png");
  */
 function renderPost(postData) {
     return (
-        <Post image={postData.item.image} caption={postData.item.caption} />
+        <Post image={postData.item.data.photoURL} caption={postData.item.caption} />
     );
 }
 
@@ -31,13 +31,16 @@ function FeedScreen({ navigation }) {
     const [posts, setPosts] = useState(null)
 
     useEffect(() => {
+        console.log(posts)
+    }, [posts]);
+    useEffect(() => {
         const fetchUserId = async () => {
             const id = await getUserIdFromStorage(); // Retrieve userId from AsyncStorage
             setUserId(id);
         };
 
         const fetchAllPostsFromFirebase = async () =>{
-            await fetchAllPosts()
+            setPosts(await fetchAllPosts())
         }
         fetchUserId();
         fetchAllPostsFromFirebase()
@@ -55,11 +58,11 @@ function FeedScreen({ navigation }) {
 
             {/* Feed container with posts */}
             <View style={styles.feedContainer}>
-                {/*<FlatList*/}
-                {/*    style={styles.feedList}*/}
-                {/*    data={posts}*/}
-                {/*    renderItem={renderPost}*/}
-                {/*/>*/}
+                <FlatList
+                    style={styles.feedList}
+                    data={posts}
+                    renderItem={renderPost}
+                />
             </View>
 
             {/* Floating button to navigate to the Create Post screen */}

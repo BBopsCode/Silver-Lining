@@ -39,8 +39,8 @@ export const uploadImage = async (image, user) =>{
         const storageRef = ref(storage, `images/${user}/${Date.now()}`);
         await uploadBytes(storageRef, blob);
 
-        const downloadRef = getDownloadURL(storageRef)
-
+        const URL = await getDownloadURL(storageRef)
+        return URL
     } catch (error) {
         console.error("Error uploading image: ", error);
         Alert.alert('Upload failed!', error.message);
@@ -82,6 +82,7 @@ export const fetchAllPosts = async () =>{
         } else {
             const results = querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
             console.log(results)
+            return results
         }
     } catch (error) {
         console.error("Error fetching posts:", error);

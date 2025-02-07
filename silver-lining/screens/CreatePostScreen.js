@@ -67,6 +67,7 @@ export default function CreatePostScreen({ navigation }) {
     const [cameraOn, setCameraOn] = useState(false);
     const [photo, setPhoto] = useState(null);
     const [userId, setUserId] = useState(null);
+    const [downloadURL, setDownloadURL] = useState(null)
 
 
     useEffect(() => {
@@ -82,7 +83,13 @@ export default function CreatePostScreen({ navigation }) {
     const addPost = async () => {
     if (userId) {
         try {
-         await addDoc(userPostCollection, { description, userId: userId, timestamp: new Date().toISOString() });
+            const url = await savePhotoToCloud()
+            await addDoc(userPostCollection, {
+                description:description,
+                userId: userId,
+                timestamp: new Date().toISOString(),
+                photoURL: url
+            });
         } catch (error) {
             console.error("Error adding post:", error);
             Alert.alert("Error", "There was an error submitting your post. Please try again.");
@@ -115,7 +122,7 @@ export default function CreatePostScreen({ navigation }) {
     //     }
     // };
     const savePhotoToCloud = async () => {
-        await uploadImage(photo.uri, userId)
+        return await uploadImage(photo.uri, userId)
         };
     /**
      * Updates the user's posts with a new post entry.
@@ -142,7 +149,6 @@ export default function CreatePostScreen({ navigation }) {
 
         await ensureDirsExist(dirNames);
         await addPost()
-        await savePhotoToCloud()
         Alert.alert("Post Submitted", "Your post has been successfully created!");
         navigation.navigate("FeedScreen")
     };
