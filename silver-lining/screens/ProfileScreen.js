@@ -54,9 +54,10 @@ function ProfileScreen({ navigation }) {
     const handleSignOut = async () => {
         try {
             await auth.signOut(); // Firebase sign-out method
+            navigation.navigate("Auth");
             await AsyncStorage.removeItem('userId'); // Remove userId from AsyncStorage
             console.log("User signed out.");
-            navigation.navigate("Auth"); // Navigate to login screen or another screen
+             // Navigate to login screen or another screen
         } catch (error) {
             console.error("Error signing out:", error);
         }
@@ -83,6 +84,12 @@ function ProfileScreen({ navigation }) {
                 style={styles.backButton}
             >
                 <MaterialIcons name="arrow-back" size={30} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity
+                onPress={handleSignOut}
+                style={styles.signOutButton}
+            >
+                <MaterialIcons name={"logout"} size={30} color="red"></MaterialIcons>
             </TouchableOpacity>
 
             {/* Profile picture */}
@@ -134,6 +141,12 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 50,
         left: 20,
+        padding: 10,
+    },
+    signOutButton: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
         padding: 10,
     },
 });

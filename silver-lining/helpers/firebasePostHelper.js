@@ -36,7 +36,7 @@ export const uploadImage = async (image, user) =>{
         const response = await fetch(image);
         const blob = await response.blob();
 
-        const storageRef = ref(storage, `images/${user}/${Date.now()}`);
+        const storageRef = ref(storage, `images/${user}/posts/${Date.now()}`);
         await uploadBytes(storageRef, blob);
 
         const URL = await getDownloadURL(storageRef)

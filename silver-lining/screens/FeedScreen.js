@@ -31,7 +31,7 @@ function FeedScreen({ navigation }) {
     const [posts, setPosts] = useState(null)
 
     useEffect(() => {
-        console.log(posts)
+        console.log("posts",posts)
     }, [posts]);
     useEffect(() => {
         const fetchUserId = async () => {

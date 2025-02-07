@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { auth } from '../util/FirebaseConfig'; // Import Firebase auth
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Alert} from "react-native";
 
 /**
  * Custom hook to manage authentication state.
@@ -17,6 +18,12 @@ export const useAuth = () => {
             if (storedUserId) {
                 setUserId(storedUserId);
                 setIsAuthenticated(true);
+            }
+            else{
+                if (storedUserId) {
+                    await AsyncStorage.removeItem('userId');
+                    Alert.alert("You have been logged out!")
+                }
             }
         };
 

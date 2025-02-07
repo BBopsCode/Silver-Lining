@@ -9,6 +9,7 @@ export default function AuthScreen() {
     const navigation = useNavigation();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('')
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -17,7 +18,7 @@ export default function AuthScreen() {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             if (userCredential.user) {
                 await AsyncStorage.setItem('userToken', userCredential.user.uid); // Store user token
-                navigation.navigate("FeedScreen");
+                navigation.navigate("ProfileCreation");
             }
         } catch (error) {
             alert("Sign up Failed: " + error.message);
@@ -58,6 +59,7 @@ export default function AuthScreen() {
                     value={email}
                     onChangeText={setEmail}
                 />
+
                 <TextInput
                     style={styles.input}
                     placeholder="Password"
@@ -91,12 +93,14 @@ export default function AuthScreen() {
 
 const styles = StyleSheet.create({
     container: {
+        backgroundColor: '#000',
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
     },
     title: {
+        color: "white",
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,

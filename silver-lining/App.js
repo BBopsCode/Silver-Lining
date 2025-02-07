@@ -11,6 +11,7 @@ import CreatePostScreen from './screens/CreatePostScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import FeedScreen from './screens/FeedScreen';
 import AuthScreen from './screens/AuthScreen';
+import ProfileCreationScreen from "./screens/ProfileCreationScreen";
 
 const Stack = createStackNavigator();
 const userDir = FileSystem.documentDirectory + 'user';
@@ -25,8 +26,14 @@ const initializeApp = async () => {
     await ensureUserFilePath(userFilePath);
 };
 
+
 export default function App() {
-    const { isLoading, isAuthenticated, userId } = useAuth(); // Use custom auth hook
+    const { isLoading, isAuthenticated, userId } = useAuth();
+    const determineRoute = async () =>{
+
+        const hasPersonalInfo = false
+    }
+     // Use custom auth hook
 
     useEffect(() => {
         initializeApp();
@@ -50,6 +57,7 @@ export default function App() {
                     <Stack.Screen name="Profile" options={{ headerShown: false }}>
                         {(props) => <ProfileScreen {...props} userId={userId} />}
                     </Stack.Screen>
+                    <Stack.Screen name={"ProfileCreation"} component={ProfileCreationScreen} options={{ headerShown: false }}/>
                 </Stack.Navigator>
             </NavigationContainer>
             <StatusBar style="light" />
