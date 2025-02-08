@@ -5,15 +5,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchPosts } from '../helpers/firebasePostHelper'; // Firebase helper
 import { readUserData } from '../helpers/userDataHelperPosts';
 import {clearUserPosts} from "../helpers/firebasePostHelper";// User data helper
+import {getData, getProfilePicture} from "../helpers/firebaseProfileData";
 import { getAuth } from "firebase/auth";
 import { auth } from "../util/FirebaseConfig";
 import ProfileScreenPosts from "../components/ProfileComponents/ProfileScreenPosts";
 
 // ProfileScreen Component
+// ProfileScreen Component
 function ProfileScreen({ navigation }) {
+    const [userData, setUserData] = useState(null);
     const [userId, setUserId] = useState(null);  // State for storing userId
     const [postData, setPostData] = useState(null); // State for storing posts data
-
     // Fetch userId from AsyncStorage
     const getUserIdFromStorage = async () => {
         try {
@@ -29,6 +31,12 @@ function ProfileScreen({ navigation }) {
     // Initialize data and fetch userId on component mount
     useEffect(() => {
         getUserIdFromStorage(); // Retrieve userId from AsyncStorage
+        const fetchData = async () => {
+            const data = await getData();
+            setUserData(data);
+
+        };
+        fetchData();
     }, []);
 
     // Fetch posts from Firestore when userId is available
@@ -36,28 +44,17 @@ function ProfileScreen({ navigation }) {
         if (userId) {
             fetchPosts(userId).then(fetchedPosts => {
                 setPostData(fetchedPosts); // Update postData state
-
             });
         }
     }, [userId]);
 
-    // Function to fetch user JSON data from local storage
-    useEffect(() => {
-        const initializeData = async () => {
-            const data = await readUserData(); // Read user data
-            setPostData(data); // Set post data in the state
-        };
-        initializeData();
-    }, []);
-
     // Handle user sign-out
     const handleSignOut = async () => {
         try {
-            await auth.signOut(); // Firebase sign-out method
             navigation.navigate("Auth");
+            await auth.signOut(); // Firebase sign-out method
             await AsyncStorage.removeItem('userId'); // Remove userId from AsyncStorage
             console.log("User signed out.");
-             // Navigate to login screen or another screen
         } catch (error) {
             console.error("Error signing out:", error);
         }
@@ -65,15 +62,17 @@ function ProfileScreen({ navigation }) {
 
     // Clear user posts
     const clearPosts = async () => {
-
         await clearUserPosts(userId); // Clear posts in local storage
-        // Sign the user out after clearing posts
     };
 
     // Profile picture and greeting text
     const imageSources = {
         "profile.png": require('../data/profile.png'),
     };
+
+    // Make sure userData is not null before destructuring
+    const { firstName, lastName, profilePhotoUrl, username } = userData || {};
+    console.log(profilePhotoUrl, "DADDY")
 
     // Component rendering
     return (
@@ -93,13 +92,14 @@ function ProfileScreen({ navigation }) {
             </TouchableOpacity>
 
             {/* Profile picture */}
-            <Image
-                source={imageSources["profile.png"]}
+
+            {profilePhotoUrl && <Image
+                source={{uri:profilePhotoUrl}}
                 style={styles.profileImage}
             />
-
+            }
             {/* User greeting and pins */}
-            <Text style={styles.greetingText}>Hello, {auth.currentUser.displayName || 'User'}! 👋</Text>
+            <Text style={styles.greetingText}>Hello {firstName} 👋</Text>
             <Text style={styles.pinsText}>📌 Pins</Text>
 
             {/* Clear posts button */}
@@ -110,6 +110,7 @@ function ProfileScreen({ navigation }) {
         </SafeAreaView>
     );
 }
+
 
 // Styles
 const styles = StyleSheet.create({

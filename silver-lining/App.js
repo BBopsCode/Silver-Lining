@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import {useEffect} from "react";
-import { ActivityIndicator, StyleSheet, View, } from 'react-native';
+import { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuth } from './hooks/useAuth'; // Import custom hook for auth
@@ -26,20 +26,32 @@ const initializeApp = async () => {
     await ensureUserFilePath(userFilePath);
 };
 
-
 export default function App() {
-    const { isLoading, isAuthenticated, userId } = useAuth();
-    const determineRoute = async () =>{
-
-        const hasPersonalInfo = false
-    }
-     // Use custom auth hook
+    const { isLoading, isAuthenticated, userId, userHasData } = useAuth();
+    const [initialRoute, setInitialRoute] = useState(null);
+    const [isAppReady, setIsAppReady] = useState(false); // Track if app initialization is complete
 
     useEffect(() => {
-        initializeApp();
-    }, []);
+        const prepareApp = async () => {
+            // Ensure directories and user file are ready
+            await initializeApp();
 
-    if (isLoading) {
+            // Wait until user authentication and profile data are loaded
+            if (!isLoading) {
+                if (isAuthenticated) {
+                    setInitialRoute(userHasData ? 'FeedScreen' : 'ProfileCreation');
+                } else {
+                    setInitialRoute('Auth');
+                }
+                setIsAppReady(true); // Mark app as ready
+            }
+        };
+
+        prepareApp();
+    }, [isLoading, isAuthenticated, userHasData]); // Re-run when these values change
+
+    // Show loading indicator until the app is ready
+    if (!isAppReady || isLoading || initialRoute === null) {
         return (
             <View style={styles.loaderContainer}>
                 <ActivityIndicator size="large" color="#fff" />
@@ -50,14 +62,14 @@ export default function App() {
     return (
         <View style={styles.container}>
             <NavigationContainer>
-                <Stack.Navigator initialRouteName={isAuthenticated ? "FeedScreen" : "Auth"}>
+                <Stack.Navigator initialRouteName={initialRoute}>
                     <Stack.Screen name="Auth" component={AuthScreen} options={{ headerShown: false }} />
                     <Stack.Screen name="FeedScreen" component={FeedScreen} options={{ headerShown: false }} />
                     <Stack.Screen name="CreatePost" component={CreatePostScreen} options={{ headerShown: false }} />
                     <Stack.Screen name="Profile" options={{ headerShown: false }}>
                         {(props) => <ProfileScreen {...props} userId={userId} />}
                     </Stack.Screen>
-                    <Stack.Screen name={"ProfileCreation"} component={ProfileCreationScreen} options={{ headerShown: false }}/>
+                    <Stack.Screen name="ProfileCreation" component={ProfileCreationScreen} options={{ headerShown: false }} />
                 </Stack.Navigator>
             </NavigationContainer>
             <StatusBar style="light" />

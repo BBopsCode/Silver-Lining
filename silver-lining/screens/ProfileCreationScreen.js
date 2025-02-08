@@ -1,5 +1,14 @@
 import React, {useEffect, useState} from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    TouchableWithoutFeedback,
+    Keyboard,
+    Alert
+} from 'react-native';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import {auth, db} from "../util/FirebaseConfig";
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import {addDoc, collection, getDocs, query, where} from "firebase/firestore";
 import ProfileImagePicker from "../components/ProfileComponents/ProfileImagePicker";
+import {handleData, usernameExists} from '../helpers/firebaseProfileCreationHelper'
 
 export default function ProfileCreationScreen() {
     const [firstName, setFirstName] =useState('')
@@ -14,9 +24,11 @@ export default function ProfileCreationScreen() {
     const [username, setUsername] =useState('')
     const [profilePictureModal, setProfilePictureModal] = useState(false)
     const [profilePhoto, setProfilePhoto] = useState(null)
+    const [isDupeUsername, setIsDupeUsername] = useState(false)
+    const [userId, setUserId] = useState(null)
+
     const navigation = useNavigation();
 
-    const [userId, setUserId] = useState(null)
 
     const getUserIdFromStorage = async () => {
         try {
@@ -47,25 +59,31 @@ export default function ProfileCreationScreen() {
         }
     }
 
-
-
-    const pickImage = async () => {
-        await ImagePicker.requestMediaLibraryPermissionsAsync()
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes:['images'],
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 1,
-        });
-
-        if (!result.canceled && result.assets && result.assets.length > 0) {
-            const imageUri = result.assets[0].uri;
-            console.log(result, 'the result');
-            setImage(imageUri);
-            console.log("Image picked: ", imageUri);
+    const handleUsernameCheck = async () =>{
+        console.log(username)
+        const usernameDupeCheck = await usernameExists(username)
+        setIsDupeUsername(usernameDupeCheck)
+    }
+    const sendData = async () =>{
+        if (!firstName) {
+            Alert.alert("First Name is required");
+        } else if (!lastName) {
+            Alert.alert("Last Name is required");
+        } else if (!username) {
+            Alert.alert("Username is required");
+        } else if (!profilePhoto) {
+            Alert.alert("Profile photo is required");
+        } else if (isDupeUsername){
+            Alert.alert("Username is taken")
+        }else
+         {
+            // All fields are present, you can proceed with further actions
+             await handleData(userId, firstName, lastName, username, profilePhoto)
+             navigation.navigate("ProfileScreen")
         }
-    };
 
+
+    }
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -94,9 +112,14 @@ export default function ProfileCreationScreen() {
                     placeholderTextColor={"#777"}
                     value={username}
                     onChangeText={setUsername}
+                    onBlur={handleUsernameCheck}
                 />
-                <TouchableOpacity onPress={handleProfilePhotoModal}>
-                    <Text style={{color: "white"}}>Image</Text>
+                <TouchableOpacity style={styles.button} onPress={handleProfilePhotoModal}>
+                    <Text style={styles.buttonText}>Choose Profile Image</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.button} onPress={sendData}>
+                    <Text style={styles.buttonText}>Create Account</Text>
                 </TouchableOpacity>
             </View>
         </TouchableWithoutFeedback>
@@ -132,6 +155,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         alignItems: 'center',
         width: '100%',
+        marginBottom:10
     },
     buttonText: {
         color: '#fff',

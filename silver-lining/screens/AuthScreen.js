@@ -30,7 +30,7 @@ export default function AuthScreen() {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             if (userCredential.user) {
                 await AsyncStorage.setItem('userToken', userCredential.user.uid); // Store user token
-                navigation.navigate("FeedScreen");
+                navigation.navigate("ProfileCreation");
             }
         } catch (error) {
             alert("Sign in Failed: " + error.message);
